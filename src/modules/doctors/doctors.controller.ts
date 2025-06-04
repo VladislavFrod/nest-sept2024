@@ -1,48 +1,63 @@
 import {
-  Body,
   Controller,
-  Delete,
   Get,
-  Param,
   Post,
-  UseGuards,
+  Body,
+  Param,
+  Delete,
+  Put,
+  UseGuards, Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
-
-
+import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
 import { AdminRoleGuard } from '../auth/guards/admin-role.guard';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
+import { DoctorSearchDto } from './dto/doctor-search.dto';
+import { UpdateDoctorDto } from './dto/update-doctor.dto';
 import { DoctorsService } from './services/doctors.service';
 
-@ApiTags('5.Doctors')
+@ApiTags('Doctors')
 @Controller('doctors')
 export class DoctorsController {
   constructor(private readonly doctorsService: DoctorsService) {}
 
   @Get()
-  async findAll() {
+  findAll() {
     return this.doctorsService.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.doctorsService.findOne(+id);
+  @Get('search')
+  @ApiQuery({ name: 'query', required: false })
+  @ApiQuery({ name: 'sortBy', enum: ['first_name', 'last_name'], required: false })
+  search(@Query() query: DoctorSearchDto) {
+    return this.doctorsService.search(query.query, query.sortBy);
   }
 
+
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.doctorsService.findOne(+id);
+  // }
+
   @ApiBearerAuth()
+  @UseGuards(JwtAccessGuard, AdminRoleGuard)
   @Post()
-  @UseGuards(JwtAccessGuard, AdminRoleGuard)
-  async create(@Body() dto: CreateDoctorDto) {
-    return this.doctorsService.createDoctor(dto);
+  create(@Body() dto: CreateDoctorDto) {
+    return this.doctorsService.create(dto);
   }
 
   @ApiBearerAuth()
-  @Delete(':id')
   @UseGuards(JwtAccessGuard, AdminRoleGuard)
-  async remove(@Param('id') id: string) {
-    await this.doctorsService.remove(+id);
-    return { message: 'Doctor deleted successfully' };
+  @Put(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateDoctorDto) {
+    return this.doctorsService.update(+id, dto);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAccessGuard, AdminRoleGuard)
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.doctorsService.remove(+id);
   }
 }

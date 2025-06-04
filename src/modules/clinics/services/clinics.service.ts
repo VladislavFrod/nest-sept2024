@@ -1,32 +1,75 @@
-import { Injectable } from '@nestjs/common';
+// src/modules/clinics/services/clinics.service.ts
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-
+import { Repository, In } from 'typeorm';
 import { ClinicEntity } from '../../../database/entities/clinic.entity';
+import { DoctorEntity } from '../../../database/entities/doctor.entity';
+import { ServiceEntity } from '../../../database/entities/service.entity';
 import { CreateClinicDto } from '../models/dto/create-clinic.dto';
 
 @Injectable()
 export class ClinicsService {
   constructor(
     @InjectRepository(ClinicEntity)
-    private clinicRepository: Repository<ClinicEntity>,
+    private readonly clinicRepo: Repository<ClinicEntity>,
+
+    @InjectRepository(DoctorEntity)
+    private readonly doctorRepo: Repository<DoctorEntity>,
+
+    @InjectRepository(ServiceEntity)
+    private readonly serviceRepo: Repository<ServiceEntity>,
   ) {}
 
-  // Отримати всі клініки з лікарями
-  async findAll() {
-    return await this.clinicRepository.find({ relations: ['doctors'] });
+  async create(dto: CreateClinicDto): Promise<ClinicEntity> {
+    const clinic = this.clinicRepo.create({ name: dto.name });
+
+    if (dto.doctorIds?.length) {
+      const doctors = await this.doctorRepo.find({
+        where: { id: In(dto.doctorIds) },
+        relations: ['services'],
+      });
+      clinic.doctors = doctors;
+    }
+
+    return this.clinicRepo.save(clinic);
   }
 
-  // Створити клініку
-  async create(createClinicDto: CreateClinicDto) {
-    const { name } = createClinicDto;
+  async search(name?: string, sortBy: 'name' | 'id' = 'name'): Promise<ClinicEntity[]> {
+    const queryBuilder = this.clinicRepo
+      .createQueryBuilder('clinic')
+      .leftJoinAndSelect('clinic.doctors', 'doctor')
+      .leftJoinAndSelect('doctor.services', 'service');
 
-    const clinic = this.clinicRepository.create({ name });
-    return await this.clinicRepository.save(clinic);
+    if (name) {
+      queryBuilder.where('LOWER(clinic.name) LIKE LOWER(:name)', { name: `%${name}%` });
+    }
+
+    queryBuilder.orderBy(`clinic.${sortBy}`, 'ASC');
+
+    return await queryBuilder.getMany();
   }
 
-  // Видалити клініку
-  async remove(id: string): Promise<void> {
-    await this.clinicRepository.delete(id);
+
+  async findAll(): Promise<ClinicEntity[]> {
+    return this.clinicRepo.find({
+      relations: ['doctors', 'doctors.services'],
+    });
+  }
+
+  async findByFilters(serviceIds?: number[], doctorIds?: number[]) {
+    const query = this.clinicRepo
+      .createQueryBuilder('clinic')
+      .leftJoinAndSelect('clinic.doctors', 'doctor')
+      .leftJoinAndSelect('doctor.services', 'service');
+
+    if (doctorIds?.length) {
+      query.andWhere('doctor.id IN (:...doctorIds)', { doctorIds });
+    }
+
+    if (serviceIds?.length) {
+      query.andWhere('service.id IN (:...serviceIds)', { serviceIds });
+    }
+
+    return query.getMany();
   }
 }

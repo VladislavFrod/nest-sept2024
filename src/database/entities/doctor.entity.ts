@@ -1,35 +1,47 @@
 import {
-  Column,
-  Entity, JoinTable, ManyToMany,
-  ManyToOne,
+  Entity,
   PrimaryGeneratedColumn,
+  Column,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { ClinicEntity } from './clinic.entity';
 import { ServiceEntity } from './service.entity';
 
-
 @Entity({ name: 'doctors' })
 export class DoctorEntity {
-  @PrimaryGeneratedColumn('increment')
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  firstName: string;
+  @Column('text')
+  first_name: string;
 
-  @Column()
-  lastName: string;
+  @Column('text')
+  last_name: string;
 
-  @Column()
-  middleName: string;
+  @Column('text', { unique: true })
+  email: string;
 
-  @Column()
-  phoneNumber: string;
+  @Column('text', { nullable: true })
+  phone: string;
 
   @ManyToMany(() => ClinicEntity, (clinic) => clinic.doctors)
+  @JoinTable({
+    name: 'doctor_clinics',
+    joinColumn: { name: 'doctor_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'clinic_id', referencedColumnName: 'id' },
+  })
   clinics: ClinicEntity[];
 
   @ManyToMany(() => ServiceEntity, (service) => service.doctors)
-  @JoinTable()
+  @JoinTable({
+    name: 'doctor_services',
+    joinColumn: { name: 'doctor_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'service_id', referencedColumnName: 'id' },
+  })
   services: ServiceEntity[];
 
+  get fullName(): string {
+    return `${this.first_name} ${this.last_name}`;
+  }
 }

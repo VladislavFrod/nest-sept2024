@@ -17,6 +17,21 @@ export class ServicesService {
     return this.serviceRepo.save(service);
   }
 
+  async search(name?: string, sortBy: 'name' | 'id' = 'name'): Promise<ServiceEntity[]> {
+    const queryBuilder = this.serviceRepo
+      .createQueryBuilder('service')
+      .leftJoinAndSelect('service.doctors', 'doctor');
+
+    if (name) {
+      queryBuilder.where('LOWER(service.name) LIKE LOWER(:name)', { name: `%${name}%` });
+    }
+
+    queryBuilder.orderBy(`service.${sortBy}`, 'ASC');
+
+    return await queryBuilder.getMany();
+  }
+
+
   async findAll(): Promise<ServiceEntity[]> {
     return this.serviceRepo.find();
   }

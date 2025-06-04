@@ -1,7 +1,12 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+// src/modules/clinics/dto/create-clinic.dto.ts
+import { IsString, IsOptional, IsArray, IsNumber } from 'class-validator';
 
 export class CreateClinicDto {
   @IsString()
-  @IsNotEmpty()
   name: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  doctorIds?: number[];
 }

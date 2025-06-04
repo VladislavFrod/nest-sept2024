@@ -1,24 +1,19 @@
-import { IsArray, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
+import { PickType } from '@nestjs/swagger';
+import { IsString, IsArray, IsOptional, IsInt } from 'class-validator';
+import { UserBaseReqDto } from '../../users/models/dto/req/base-user.req.dto';
 
-export class CreateDoctorDto {
-  @IsString()
-  firstName: string;
-
-  @IsString()
-  lastName: string;
-
-  @IsOptional()
-  @IsString()
-  middleName?: string;
-
-  @IsString()
-  phoneNumber: string;
+export class CreateDoctorDto extends PickType(UserBaseReqDto, [
+  'first_name',
+  'last_name',
+  'email',
+  'phone',
+]) {
 
   @IsArray()
-  @IsNumber({}, { each: true })
+  @IsInt({ each: true })
   clinicIds: number[];
 
   @IsArray()
-  @IsNumber({}, { each: true })
+  @IsInt({ each: true })
   serviceIds: number[];
 }

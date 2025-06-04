@@ -1,18 +1,24 @@
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
   Logger,
   NotAcceptableException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { request } from 'express';
+import { addMinutes } from 'date-fns';
+import { Repository } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
 
 import { AdminConfigType, EnvConfigType } from '../../../configs/config.type';
+import { PasswordResetToken } from '../../../database/entities/password-reset-token.entity';
 import { UserEntity } from '../../../database/entities/user.entity';
 import { RefreshTokenRepository } from '../../repository/services/refresh-token.repository';
 import { UserRepository } from '../../repository/services/user.repository';
@@ -35,6 +41,8 @@ export class AuthService {
     @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
     private readonly envConfig: ConfigService<EnvConfigType>,
+    @InjectRepository(PasswordResetToken)
+    private readonly resetTokenRepository: Repository<PasswordResetToken>,
   ) {}
 
   private async generateSaveTokens(
@@ -132,6 +140,42 @@ export class AuthService {
       throw new UnauthorizedException('Email is already taken');
     }
   }
+//Token
+  async generateResetToken(email: string): Promise<{ token: string }> {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) throw new NotFoundException('Користувача не знайдено');
+
+    const token = uuidv4();
+
+    await this.resetTokenRepository.save({
+      userId: user.id,
+      token,
+    });
+
+    return { token };
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const record = await this.resetTokenRepository.findOne({ where: { token } });
+    if (!record) throw new BadRequestException('Недійсний токен');
+
+    const expiredAt = addMinutes(record.createdAt, 15);
+    const now = new Date();
+
+    if (expiredAt.getTime() < now.getTime()) {
+      throw new BadRequestException('Токен прострочено');
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: record.user.id } });
+
+    if (!user) throw new NotFoundException('Користувача не знайдено');
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await this.userRepository.save(user);
+
+    await this.resetTokenRepository.delete({ id: record.id });
+  }
+//Token
   public async adminCreate(): Promise<void> {
     const dto = plainToInstance(
       UserCreateByAdminReqDto,

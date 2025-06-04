@@ -7,12 +7,14 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { GetStoredUserDataFromResponse } from '../../common/decorators/get-stored-user-data-from-response.decorator';
 import { UserPresenterService } from '../users/services/user-presenter.service';
 import { JwtAccessGuard } from './guards/jwt-access.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+import { ForgotPasswordReqDto } from './models/dto/req/forgot-password-req.dto';
+import { ResetPasswordReqDto } from './models/dto/req/reset-password-req.dto';
 import { UserSingInReqDto } from './models/dto/req/sign-in.req.dto';
 import { UserSingUpReqDto } from './models/dto/req/sign-up.req.dto';
 import { AuthResDto } from './models/dto/res/auth.res.dto';
@@ -20,7 +22,6 @@ import { TokenPairResDto } from './models/dto/res/token-pair.res.dto';
 import { IUserData } from './models/interfaces/user-data.interface';
 import { AuthService } from './services/auth.service';
 
-// eslint-disable-next-line max-len
 
 @ApiTags('1.Authorization')
 @Controller('auth')
@@ -53,7 +54,20 @@ export class AuthController {
     const [user, tokens] = await this.authService.singIn(dto, request);
     return { tokens, user: this.userPresenter.toResponseDto(user) };
   }
+  //Token
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Отримати токен для скидання паролю' })
+  async forgotPassword(@Body() dto: ForgotPasswordReqDto): Promise<{ token: string }> {
+    return this.authService.generateResetToken(dto.email);
+  }
 
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Скинути пароль за токеном' })
+  async resetPassword(@Body() dto: ResetPasswordReqDto): Promise<{ message: string }> {
+    await this.authService.resetPassword(dto.token, dto.newPassword);
+    return { message: 'Пароль успішно змінено' };
+  }
+  //Token
   // Skip access token check
 
   // add refresh token check

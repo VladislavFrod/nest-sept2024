@@ -24,6 +24,6 @@ import { DoctorsService } from './services/doctors.service';
   ],
   providers: [DoctorsService],
   controllers: [DoctorsController],
-  exports: [DoctorsService],
+  exports: [DoctorsService, TypeOrmModule],
 })
 export class DoctorsModule {}

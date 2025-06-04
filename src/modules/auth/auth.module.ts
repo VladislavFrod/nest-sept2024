@@ -1,5 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { PasswordResetToken } from '../../database/entities/password-reset-token.entity';
 import { DoctorsService } from '../doctors/services/doctors.service';
 
 import { RedisModule } from '../redis/redis.module';
@@ -16,6 +18,7 @@ import { TokenService } from './services/token.service';
     JwtModule,
     RedisModule,
     forwardRef(() => UsersModule),
+    TypeOrmModule.forFeature([PasswordResetToken]),//Token
   ],
   controllers: [AuthController],
   providers: [

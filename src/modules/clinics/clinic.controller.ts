@@ -1,33 +1,54 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { AdminRoleGuard } from '../auth/guards/admin-role.guard';
-import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
+// src/modules/clinics/clinics.controller.ts
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ClinicSearchDto } from './models/dto/clinic-search.dto';
 import { CreateClinicDto } from './models/dto/create-clinic.dto';
 import { ClinicsService } from './services/clinics.service';
+import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
+import { AdminRoleGuard } from '../auth/guards/admin-role.guard';
 
-@ApiTags('4.Clinic')
+@ApiTags('5. Clinics')
 @Controller('clinics')
 export class ClinicsController {
-  constructor(private readonly clinicsService: ClinicsService) {
-  }
+  constructor(private readonly clinicsService: ClinicsService) {}
 
   @Get()
   async findAll() {
-    return await this.clinicsService.findAll();
+    return this.clinicsService.findAll();
+  }
+
+  // @Get('filter')
+  // async filter(
+  //   @Query('serviceIds') serviceIdsRaw?: string,
+  //   @Query('doctorIds') doctorIdsRaw?: string,
+  // ) {
+  //   const serviceIds = serviceIdsRaw
+  //     ? serviceIdsRaw.split(',').map(Number)
+  //     : undefined;
+  //   const doctorIds = doctorIdsRaw
+  //     ? doctorIdsRaw.split(',').map(Number)
+  //     : undefined;
+  //
+  //   return this.clinicsService.findByFilters(serviceIds, doctorIds);
+  // }
+  @Get('search')
+  @ApiQuery({ name: 'name', required: false })
+  @ApiQuery({ name: 'sortBy', enum: ['name', 'id'], required: false })
+  search(@Query() query: ClinicSearchDto) {
+    return this.clinicsService.search(query.name, query.sortBy);
   }
 
   @ApiBearerAuth()
   @Post()
   @UseGuards(JwtAccessGuard, AdminRoleGuard)
-  async create(@Body() createClinicDto: CreateClinicDto) {
-    return await this.clinicsService.create(createClinicDto);
-  }
-
-  @ApiBearerAuth()
-  @Delete(':id')
-  @UseGuards(JwtAccessGuard, AdminRoleGuard)
-  async deleteClinics(@Param('id') id: string) {
-    await this.clinicsService.remove(id);
-    return { message: 'Category deleted successfully' };
+  async create(@Body() dto: CreateClinicDto) {
+    return this.clinicsService.create(dto);
   }
 }
