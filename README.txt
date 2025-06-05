@@ -5,6 +5,9 @@
 
 Колекції постмана немає так як вся інформація є в свагері http://localhost:3000/api-docs
 
+Команда для відновлення бази з дампу (docker exec -i next-sept2024-db-local-postgres-1 psql -U frod -d db-postgres_frod < backup.sql)
+
+
 Ось дані для env та дані для входу в адмін аккаунт
 
 APP_PORT=3000
