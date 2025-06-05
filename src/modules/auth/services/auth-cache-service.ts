@@ -37,8 +37,7 @@ export class AuthAccessService {
     access: string,
   ): Promise<boolean> {
     const key = await this.getKey(userId, deviceId);
-    //  sMembers()  - Redis command returns all the members of the set stored at key as array.
-    // If the set is empty or the key does not exist, it returns an empty array.
+
     const set = await this.redisService.sMembers(key);
     return set.includes(access);
   }

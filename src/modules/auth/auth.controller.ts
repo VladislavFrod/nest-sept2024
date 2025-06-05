@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  forwardRef,
-  Inject,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, forwardRef, Inject, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { GetStoredUserDataFromResponse } from '../../common/decorators/get-stored-user-data-from-response.decorator';
@@ -32,12 +24,13 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     @Inject(forwardRef(() => UserPresenterService))
-    userPresenter: UserPresenterService,
+      userPresenter: UserPresenterService,
   ) {
     this.userPresenter = userPresenter;
   }
 
   @Post('sing-up')
+  @ApiOperation({ summary: 'Реєстрація користувача' })
   // ToDo
   public async singUp(
     @Body() dto: UserSingUpReqDto,
@@ -47,6 +40,7 @@ export class AuthController {
   }
 
   @Post('sing-in')
+  @ApiOperation({ summary: 'Вхід' })
   public async singIn(
     @Body() dto: UserSingInReqDto,
     @Req() request: Request,
@@ -54,7 +48,7 @@ export class AuthController {
     const [user, tokens] = await this.authService.singIn(dto, request);
     return { tokens, user: this.userPresenter.toResponseDto(user) };
   }
-  //Token
+
   @Post('forgot-password')
   @ApiOperation({ summary: 'Отримати токен для скидання паролю' })
   async forgotPassword(@Body() dto: ForgotPasswordReqDto): Promise<{ token: string }> {
@@ -67,12 +61,8 @@ export class AuthController {
     await this.authService.resetPassword(dto.token, dto.newPassword);
     return { message: 'Пароль успішно змінено' };
   }
-  //Token
-  // Skip access token check
 
-  // add refresh token check
   @UseGuards(JwtRefreshGuard)
-  // Add authorization marker to endpoint in Swagger
   @ApiBearerAuth()
   @Post('refresh')
   public async refresh(
@@ -84,6 +74,7 @@ export class AuthController {
   @UseGuards(JwtAccessGuard)
   @ApiBearerAuth()
   @Post('sign-out')
+  @ApiOperation({ summary: 'Вийти з аккаунту' })
   async signOut(
     @GetStoredUserDataFromResponse() userData: IUserData,
   ): Promise<void> {

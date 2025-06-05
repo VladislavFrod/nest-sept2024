@@ -14,9 +14,9 @@ export const FileLimitation = (
   return applyDecorators(
     UseInterceptors(
       FileInterceptor(file_name, {
-        limits: { fileSize: file_size }, // Limit file size
+        limits: { fileSize: file_size },
         fileFilter: (req, file, callback) => {
-          // Validate file type
+
           if (!file.mimetype.match(permitImageRegexp)) {
             return callback(
               new BadRequestException(

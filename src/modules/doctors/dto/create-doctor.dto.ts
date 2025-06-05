@@ -1,5 +1,5 @@
 import { PickType } from '@nestjs/swagger';
-import { IsString, IsArray, IsOptional, IsInt } from 'class-validator';
+import { IsArray, IsInt } from 'class-validator';
 import { UserBaseReqDto } from '../../users/models/dto/req/base-user.req.dto';
 
 export class CreateDoctorDto extends PickType(UserBaseReqDto, [

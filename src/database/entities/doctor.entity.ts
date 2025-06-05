@@ -40,8 +40,4 @@ export class DoctorEntity {
     inverseJoinColumn: { name: 'service_id', referencedColumnName: 'id' },
   })
   services: ServiceEntity[];
-
-  get fullName(): string {
-    return `${this.first_name} ${this.last_name}`;
-  }
 }

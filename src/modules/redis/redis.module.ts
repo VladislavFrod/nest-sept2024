@@ -6,7 +6,6 @@ import { EnvConfigType, RedisConfigType } from '../../configs/config.type';
 import { REDIS_CLIENT } from './models/redis.constants';
 import { RedisService } from './services/redis.service';
 
-// export const REDIS_CLIENT = 'REDIS_CLIENT';
 
 const redisProvider: Provider = {
   useFactory: (envConfig: ConfigService<EnvConfigType>) => {

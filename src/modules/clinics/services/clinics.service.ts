@@ -1,7 +1,6 @@
-// src/modules/clinics/services/clinics.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { ClinicEntity } from '../../../database/entities/clinic.entity';
 import { DoctorEntity } from '../../../database/entities/doctor.entity';
 import { ServiceEntity } from '../../../database/entities/service.entity';
@@ -12,13 +11,12 @@ export class ClinicsService {
   constructor(
     @InjectRepository(ClinicEntity)
     private readonly clinicRepo: Repository<ClinicEntity>,
-
     @InjectRepository(DoctorEntity)
     private readonly doctorRepo: Repository<DoctorEntity>,
-
     @InjectRepository(ServiceEntity)
     private readonly serviceRepo: Repository<ServiceEntity>,
-  ) {}
+  ) {
+  }
 
   async create(dto: CreateClinicDto): Promise<ClinicEntity> {
     const clinic = this.clinicRepo.create({ name: dto.name });
@@ -30,7 +28,6 @@ export class ClinicsService {
       });
       clinic.doctors = doctors;
     }
-
     return this.clinicRepo.save(clinic);
   }
 
@@ -39,37 +36,16 @@ export class ClinicsService {
       .createQueryBuilder('clinic')
       .leftJoinAndSelect('clinic.doctors', 'doctor')
       .leftJoinAndSelect('doctor.services', 'service');
-
     if (name) {
       queryBuilder.where('LOWER(clinic.name) LIKE LOWER(:name)', { name: `%${name}%` });
     }
-
     queryBuilder.orderBy(`clinic.${sortBy}`, 'ASC');
-
     return await queryBuilder.getMany();
   }
-
 
   async findAll(): Promise<ClinicEntity[]> {
     return this.clinicRepo.find({
       relations: ['doctors', 'doctors.services'],
     });
-  }
-
-  async findByFilters(serviceIds?: number[], doctorIds?: number[]) {
-    const query = this.clinicRepo
-      .createQueryBuilder('clinic')
-      .leftJoinAndSelect('clinic.doctors', 'doctor')
-      .leftJoinAndSelect('doctor.services', 'service');
-
-    if (doctorIds?.length) {
-      query.andWhere('doctor.id IN (:...doctorIds)', { doctorIds });
-    }
-
-    if (serviceIds?.length) {
-      query.andWhere('service.id IN (:...serviceIds)', { serviceIds });
-    }
-
-    return query.getMany();
   }
 }

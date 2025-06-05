@@ -1,14 +1,10 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
-import { DoctorEntity } from '../../database/entities/doctor.entity';
 import { ClinicEntity } from '../../database/entities/clinic.entity';
+import { DoctorEntity } from '../../database/entities/doctor.entity';
 import { ServiceEntity } from '../../database/entities/service.entity';
 import { UserEntity } from '../../database/entities/user.entity';
 import { AuthModule } from '../auth/auth.module';
-import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
-
-
 import { DoctorsController } from './doctors.controller';
 import { DoctorsService } from './services/doctors.service';
 
@@ -26,4 +22,5 @@ import { DoctorsService } from './services/doctors.service';
   controllers: [DoctorsController],
   exports: [DoctorsService, TypeOrmModule],
 })
-export class DoctorsModule {}
+export class DoctorsModule {
+}

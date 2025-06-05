@@ -19,13 +19,12 @@ export class AwsStorageService {
 
   constructor(
     private readonly configService: ConfigService<EnvConfigType>,
-    // private readonly logger: LoggerService,
   ) {
     this.awsConfig = this.configService.get<AwsConfig>('aws');
 
     this.s3Client = new S3Client({
-      forcePathStyle: true /*to redirect to local bucket*/,
-      endpoint: this.awsConfig.localBucket /*to redirect to local bucket*/,
+      forcePathStyle: true,
+      endpoint: this.awsConfig.localBucket,
       region: this.awsConfig.region,
       credentials: {
         accessKeyId: this.awsConfig.accessKeyId,
@@ -69,7 +68,6 @@ export class AwsStorageService {
       );
       return filePath;
     } catch (error) {
-      // this.logger.error(error);
       Logger.error(error);
     }
   }
@@ -84,7 +82,6 @@ export class AwsStorageService {
       );
     } catch (error) {
       Logger.log(error);
-      // this.logger.error(error);
     }
   }
 }

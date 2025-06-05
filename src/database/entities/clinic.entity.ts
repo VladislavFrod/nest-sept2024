@@ -1,11 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToMany,
-  JoinTable,
-  OneToMany,
-} from 'typeorm';
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { DoctorEntity } from './doctor.entity';
 import { ServiceEntity } from './service.entity';
 
@@ -20,6 +13,5 @@ export class ClinicEntity {
   @ManyToMany(() => DoctorEntity, (doctor) => doctor.clinics)
   doctors: DoctorEntity[];
 
-  // Послуги клініки — не зв’язок у БД, а поле для зручності (будемо формувати у сервісі)
   services?: ServiceEntity[];
 }

@@ -8,11 +8,12 @@ import environmentConfiguration from '../../configs/configuration';
     ConfigModule.forRoot({
       load: [
         environmentConfiguration,
-      ] /* add configuration to app Module import*/,
+      ],
       isGlobal:
-        true /* flag to have access to variable globally: will be visible in all modules of app*/,
+        true,
     }),
   ],
   exports: [ConfigModule],
 })
-export class EnvConnectionModule {}
+export class EnvConnectionModule {
+}

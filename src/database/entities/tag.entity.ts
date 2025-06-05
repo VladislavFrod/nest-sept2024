@@ -12,10 +12,6 @@ export class TagEntity extends CreateUpdateModel {
   @Column('text')
   name: string;
 
-  // @ManyToMany(() => ProductEntity, (entity) => entity.tags)
-  // @JoinTable()
-  // articles?: ProductEntity[];
-
   @VirtualColumn({ query: () => 'NULL' })
   articleCount?: number;
 }

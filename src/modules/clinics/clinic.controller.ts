@@ -1,4 +1,3 @@
-// src/modules/clinics/clinics.controller.ts
 import {
   Body,
   Controller,
@@ -7,38 +6,26 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ClinicSearchDto } from './models/dto/clinic-search.dto';
 import { CreateClinicDto } from './models/dto/create-clinic.dto';
 import { ClinicsService } from './services/clinics.service';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
 import { AdminRoleGuard } from '../auth/guards/admin-role.guard';
 
-@ApiTags('5. Clinics')
+@ApiTags('4. Clinics')
 @Controller('clinics')
 export class ClinicsController {
   constructor(private readonly clinicsService: ClinicsService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Отримати список всіх клінік' })
   async findAll() {
     return this.clinicsService.findAll();
   }
 
-  // @Get('filter')
-  // async filter(
-  //   @Query('serviceIds') serviceIdsRaw?: string,
-  //   @Query('doctorIds') doctorIdsRaw?: string,
-  // ) {
-  //   const serviceIds = serviceIdsRaw
-  //     ? serviceIdsRaw.split(',').map(Number)
-  //     : undefined;
-  //   const doctorIds = doctorIdsRaw
-  //     ? doctorIdsRaw.split(',').map(Number)
-  //     : undefined;
-  //
-  //   return this.clinicsService.findByFilters(serviceIds, doctorIds);
-  // }
   @Get('search')
+  @ApiOperation({ summary: 'Пошук клінік по назві' })
   @ApiQuery({ name: 'name', required: false })
   @ApiQuery({ name: 'sortBy', enum: ['name', 'id'], required: false })
   search(@Query() query: ClinicSearchDto) {
@@ -46,6 +33,7 @@ export class ClinicsController {
   }
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Створити нову клініку(тільки для адміністраторів)' })
   @Post()
   @UseGuards(JwtAccessGuard, AdminRoleGuard)
   async create(@Body() dto: CreateClinicDto) {

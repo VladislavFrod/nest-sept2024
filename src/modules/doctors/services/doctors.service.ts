@@ -12,13 +12,12 @@ export class DoctorsService {
   constructor(
     @InjectRepository(DoctorEntity)
     private doctorRepo: Repository<DoctorEntity>,
-
     @InjectRepository(ClinicEntity)
     private clinicRepo: Repository<ClinicEntity>,
-
     @InjectRepository(ServiceEntity)
     private serviceRepo: Repository<ServiceEntity>,
-  ) {}
+  ) {
+  }
 
   async create(dto: CreateDoctorDto): Promise<DoctorEntity> {
     const clinics = await this.clinicRepo.findBy({ id: In(dto.clinicIds) });
@@ -58,12 +57,13 @@ export class DoctorsService {
   async search(query?: string, sortBy?: 'first_name' | 'last_name'): Promise<DoctorEntity[]> {
     const queryBuilder = this.doctorRepo
       .createQueryBuilder('doctor')
+      .leftJoinAndSelect('doctor.clinics', 'clinic')
       .leftJoinAndSelect('doctor.services', 'service');
 
     if (query) {
       queryBuilder.where(`
-      LOWER(doctor.firstName) LIKE LOWER(:query)
-      OR LOWER(doctor.lastName) LIKE LOWER(:query)
+      LOWER(doctor.first_name) LIKE LOWER(:query)
+      OR LOWER(doctor.last_name) LIKE LOWER(:query)
       OR LOWER(doctor.email) LIKE LOWER(:query)
       OR LOWER(doctor.phone) LIKE LOWER(:query)
     `, { query: `%${query}%` });

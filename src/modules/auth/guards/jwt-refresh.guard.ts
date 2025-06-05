@@ -16,10 +16,11 @@ export class JwtRefreshGuard implements CanActivate {
     private readonly tokenService: TokenService,
     private readonly refreshTokenRepository: RefreshTokenRepository,
     private readonly userRepository: UserRepository,
-  ) {}
+  ) {
+  }
 
   async canActivate(
-    context: ExecutionContext /* give access to current request data*/,
+    context: ExecutionContext,
   ): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const refresh = request.get('Authorization')?.split(' ').pop();

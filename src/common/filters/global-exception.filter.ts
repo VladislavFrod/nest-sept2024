@@ -11,14 +11,10 @@ import { JsonWebTokenError, TokenExpiredError } from '@nestjs/jwt';
 import { Request, Response } from 'express';
 import { QueryFailedError } from 'typeorm';
 
-// import { LoggerService } from '../../modules/logger/logger.service';
 
-// Decorator telling to Nest where to send all errors/exemptions
-@Catch(/*HttpException*/) /*If no argument all errors will be intercepted and handled*/
+@Catch(/*HttpException*/)
 
-// Class handling exemptions
-/*This enforces that the class provides an implementation
-for the catch method, which is part of the ExceptionFilter interface.*/
+
 export class GlobalExceptionFilter implements ExceptionFilter {
   catch(
     exception: HttpException,

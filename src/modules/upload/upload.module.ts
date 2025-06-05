@@ -12,7 +12,7 @@ import { UploadController } from './upload.controller';
   imports: [
     MulterModule.register({
       storage: diskStorage({
-        destination: './uploads/items', // Директорія для зберігання фото
+        destination: './uploads/items',
         filename: (req, file, callback) => {
           const uniqueSuffix = uuidv4();
           const fileExtName = extname(file.originalname);

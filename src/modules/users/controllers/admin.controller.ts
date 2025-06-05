@@ -7,7 +7,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { AdminRoleGuard } from '../../auth/guards/admin-role.guard';
 import { JwtAccessGuard } from '../../auth/guards/jwt-access.guard';
@@ -27,6 +27,7 @@ export class AdminController {
 
   @ApiBearerAuth()
   @Post('user')
+  @ApiOperation({ summary: 'Створити нового адміністратора(Тільки для адміністраторів)' })
   @UseGuards(JwtAccessGuard, AdminRoleGuard)
   public async createUser(
     @Body() dto: UserCreateByAdminReqDto,
@@ -38,6 +39,7 @@ export class AdminController {
 
   @ApiBearerAuth()
   @Patch(':user_id/user')
+  @ApiOperation({ summary: 'Оновити дані/роль користувача по ід(Тільки для адміністраторів)' })
   @UseGuards(JwtAccessGuard, AdminRoleGuard)
   public async updateUser(
     @Param('user_id', ParseUUIDPipe) user_id: string,

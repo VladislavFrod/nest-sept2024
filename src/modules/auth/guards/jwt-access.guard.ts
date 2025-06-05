@@ -18,14 +18,10 @@ export class JwtAccessGuard implements CanActivate {
     private readonly tokenService: TokenService,
     private readonly authAccessService: AuthAccessService,
     private readonly userRepository: UserRepository,
-  ) {}
+  ) {
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // const skipAuth = this.reflector.getAllAndOverride<boolean>('SKIP_AUTH', [
-    //   context.getHandler(),
-    //   context.getClass(),
-    // ]);
-    // if (skipAuth) return true;
 
     const request = context.switchToHttp().getRequest();
     const access = request.get('Authorization')?.split(' ').pop();

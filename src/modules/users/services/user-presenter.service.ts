@@ -38,7 +38,6 @@ export class UserPresenterService {
       email: user.email,
       phone: user.phone,
       role: user.role,
-      // verify: user.verify,
       avatar_image: user.avatar_image
         ? `${awsConfig.bucketURL}/${user.avatar_image}`
         : null,
@@ -56,7 +55,6 @@ export class UserPresenterService {
       email: user.email,
       phone: user.phone,
       role: user.role,
-      // verify: user.verify,
       avatar_image: user.avatar_image
         ? `${awsConfig.bucketURL}/${user.avatar_image}`
         : null,

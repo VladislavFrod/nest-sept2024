@@ -1,4 +1,3 @@
-// src/modules/clinics/dto/create-clinic.dto.ts
 import { IsString, IsOptional, IsArray, IsNumber } from 'class-validator';
 
 export class CreateClinicDto {

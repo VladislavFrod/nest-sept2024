@@ -30,7 +30,6 @@ export class UserListItemResDto {
   public readonly phone: string;
 
   public readonly role: AdminRoleEnum;
-  // public readonly verify: boolean;
 
   public readonly avatar_image?: string;
 

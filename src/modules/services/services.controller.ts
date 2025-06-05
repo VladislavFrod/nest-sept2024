@@ -7,7 +7,7 @@ import {
   Post, Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AdminRoleGuard } from '../auth/guards/admin-role.guard';
 import { JwtAccessGuard } from '../auth/guards/jwt-access.guard';
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -22,11 +22,13 @@ export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Отримати всі доступні послуги' })
   async findAll() {
     return this.servicesService.findAll();
   }
 
   @Get('search')
+  @ApiOperation({ summary: 'Пошук послуг за частиною назви' })
   @ApiQuery({ name: 'name', required: false })
   @ApiQuery({ name: 'sortBy', enum: ['name', 'id'], required: false })
   search(@Query() query: ServiceSearchDto) {
@@ -35,6 +37,7 @@ export class ServicesController {
 
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Створити нову послугу (тільки для адміністраторів)' })
   @Post()
   @UseGuards(JwtAccessGuard, AdminRoleGuard)
   async create(@Body() dto: CreateServiceDto) {
@@ -42,6 +45,7 @@ export class ServicesController {
   }
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Видалити послугу (тільки для адміністраторів)' })
   @Delete(':id')
   @UseGuards(JwtAccessGuard, AdminRoleGuard)
   async delete(@Param('id') id: string) {

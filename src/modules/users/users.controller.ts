@@ -52,6 +52,7 @@ export class UsersController {
     },
   })
   @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiOperation({ summary: 'Отримати інформацію про мене' })
   @UseGuards(JwtAccessGuard)
   @Get('me')
   public async findMe(
@@ -64,6 +65,7 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiOperation({ summary: 'Оновити інформацію про мене' })
   @Patch('me')
   public async updateMe(
     @GetStoredUserDataFromResponse() userData: IUserData,
@@ -77,6 +79,7 @@ export class UsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiNoContentResponse({ description: 'User successfully removed' })
+  @ApiOperation({ summary: 'Видалити мій аккаунт' })
   @UseGuards(JwtAccessGuard)
   @Delete('me')
   public async removeMe(
@@ -84,6 +87,7 @@ export class UsersController {
   ): Promise<void> {
     await this.usersService.removeMe(userData);
   }
+
 
   @UseGuards(JwtAccessGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -122,6 +126,7 @@ export class UsersController {
   }
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Отримати всіх користувачів (тільки для адміністраторів)' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @UseGuards(JwtAccessGuard, AdminRoleGuard) // Доступ лише для адмінів

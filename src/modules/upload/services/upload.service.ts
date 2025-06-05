@@ -9,12 +9,12 @@ export class UploadService {
     const outputFilePath = path.join('uploads', `compressed-${file.filename}`);
 
     await sharp(file.path)
-      .resize(800) // Змінюємо розмір до 800px по ширині
-      .toFormat('jpeg') // Конвертуємо в JPEG
-      .jpeg({ quality: 80 }) // Стискаємо до 80%
+      .resize(800)
+      .toFormat('jpeg')
+      .jpeg({ quality: 80 })
       .toFile(outputFilePath);
 
-    // Видаляємо оригінал, залишаємо тільки оптимізоване зображення
+
     fs.unlinkSync(file.path);
 
     return { url: `/uploads/compressed-${file.filename}` };

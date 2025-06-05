@@ -43,7 +43,8 @@ export class AuthService {
     private readonly envConfig: ConfigService<EnvConfigType>,
     @InjectRepository(PasswordResetToken)
     private readonly resetTokenRepository: Repository<PasswordResetToken>,
-  ) {}
+  ) {
+  }
 
   private async generateSaveTokens(
     user_id: string,
@@ -65,7 +66,6 @@ export class AuthService {
   }
 
   private async deleteTokens(user_id: string, device: string) {
-    // delete previously issued refresh and access Tokens
     await Promise.all([
       this.refreshRepository.delete({
         device,
@@ -79,7 +79,7 @@ export class AuthService {
     dto: UserSingUpReqDto,
     request: Request,
   ): Promise<[UserEntity, TokenPairResDto]> {
-    // Check if user exist
+
     await this.userService.isEmailExistOrThrow(dto.email);
     const device = request.headers['user-agent'];
     const password = await bcrypt.hash(dto.password, 10);
@@ -94,7 +94,7 @@ export class AuthService {
     dto: UserSingInReqDto,
     request: Request,
   ): Promise<[UserEntity, TokenPairResDto]> {
-    // Is user exist?
+
     const user = await this.userRepository.findOne({
       where: { email: dto.email },
       select: {
@@ -113,13 +113,13 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException();
     }
-    // Is password valid?
+
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException();
     }
     const device = request.headers['user-agent'];
-    // delete previously issued refresh and access Tokens
+
     await this.deleteTokens(user.id, device);
     const tokens = await this.generateSaveTokens(user.id, device);
     return [user, tokens];
@@ -140,7 +140,7 @@ export class AuthService {
       throw new UnauthorizedException('Email is already taken');
     }
   }
-//Token
+
   async generateResetToken(email: string): Promise<{ token: string }> {
     const user = await this.userRepository.findOne({ where: { email } });
     if (!user) throw new NotFoundException('Користувача не знайдено');
@@ -148,34 +148,36 @@ export class AuthService {
     const token = uuidv4();
 
     await this.resetTokenRepository.save({
-      userId: user.id,
       token,
+      user,
     });
 
     return { token };
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
-    const record = await this.resetTokenRepository.findOne({ where: { token } });
+    const record = await this.resetTokenRepository.findOne({
+      where: { token },
+      relations: ['user'], // ← додано
+    });
+
     if (!record) throw new BadRequestException('Недійсний токен');
 
-    const expiredAt = addMinutes(record.createdAt, 15);
+    const expiredAt = addMinutes(record.createdAt, 1500);
     const now = new Date();
 
     if (expiredAt.getTime() < now.getTime()) {
       throw new BadRequestException('Токен прострочено');
     }
 
-    const user = await this.userRepository.findOne({ where: { id: record.user.id } });
-
-    if (!user) throw new NotFoundException('Користувача не знайдено');
+    const user = record.user; // ← тепер не буде undefined
 
     user.password = await bcrypt.hash(newPassword, 10);
     await this.userRepository.save(user);
 
     await this.resetTokenRepository.delete({ id: record.id });
   }
-//Token
+
   public async adminCreate(): Promise<void> {
     const dto = plainToInstance(
       UserCreateByAdminReqDto,
@@ -205,12 +207,6 @@ export class AuthService {
       } else {
         Logger.log('Administrator account exist');
       }
-      // const { port, host } = this.envConfig.get<AppConfigType>('app');
-      // await this.mailService.sendMail(EmailTypeEnum.ADMIN_GREETING, dto.email, {
-      //   first_name: dto.first_name,
-      //   last_name: dto.last_name,
-      //   api_docs_url: `http://${host}:${port}/api-docs`,
-      // });
     } catch (err) {
       Logger.log('Administrator account creation error', err);
     }
