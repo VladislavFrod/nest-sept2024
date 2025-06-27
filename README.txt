@@ -3,7 +3,8 @@
 і я вже був створив проект (для карів і потім вже під інтернет магазин)-
  Помилка в платформі цього проекту(Створив його на next js) але всі - модулі встановив для nest js
 
-Колекції постмана немає так як вся інформація є в свагері http://localhost:3000/api-docs
+Колекція постмана в файлі : postman-collection.json
+Колекція свагера в файлі: swagger-collection.json та посиланні http://localhost:3000/api-docs
 
 Команда для відновлення бази з дампу (docker exec -i next-sept2024-db-local-postgres-1 psql -U frod -d db-postgres_frod < backup.sql)
 
